@@ -14,7 +14,7 @@ intents.bans = True
 intents.typing = True
 bot = commands.Bot(command_prefix="jm ", case_insensitive=True, intents=intents)
 token = config['bot-token']
-bot.owner_ids = config['bot-owners']
+bot.owner_ids = config['bot-owner-ids']
 
 @bot.event
 async def on_ready():
