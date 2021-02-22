@@ -1,7 +1,7 @@
 # da imports
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, ipc
 import os
 import random
 import json
@@ -17,11 +17,25 @@ with open("bot_config/credentials.json") as f:
 with open("bot_config/bot-emojis.json") as f:
     bot_emojis = json.load(f)
 
+class Bot(commands.Bot):
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+
+        self.ipc = ipc.Server(self,secret_key = "JamEater")
+
+    async def on_ipc_ready(self):
+        """Called upon the IPC Server being ready"""
+        print("Ipc server is ready.")
+
+    async def on_ipc_error(self, endpoint, error):
+        """Called upon an error being raised within an IPC route"""
+        print(endpoint, "raised", error)
+
 # defining a few stuff...
 intents = discord.Intents.all()
 intents.members = True
 intents.bans = True
-bot = commands.Bot(command_prefix=commands.when_mentioned_or("jm "), case_insensitive=True, intents=intents, allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, users=True))
+bot = Bot(command_prefix=commands.when_mentioned_or("jm "), case_insensitive=True, intents=intents, allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, users=True))
 bot.remove_command("help")
 token = config['bot-token']
 bot.owner_ids = config['bot-owner-ids']
@@ -174,5 +188,46 @@ async def on_ready():
 async def on_message_edit(msg_before, message):
   await bot.process_commands(message)
 
+# IPC Stuff for dashboard
+
+@bot.ipc.route()
+async def checkforguild(data):
+	try:
+		server = bot.get_guild(data.guildid)
+	except:
+		return None
+	else:
+		return True
+
+@bot.ipc.route()
+async def getnickname(data):
+	guild = bot.get_guild(int(data.guildid))
+	if guild.me.nick:
+		return str(guild.me.nick)
+	return bot.user.name
+
+@bot.ipc.route()
+async def getprefix(data):
+	prefixes = await bot.prefixes.find(data.guildid)
+	if not prefixes or "prefix" not in prefixes:
+		return bot.command_prefix
+	return str(prefixes["prefix"])
+
+@my_bot.ipc.route()
+async def changenick(data):
+	guild = my_bot.get_guild(data.guildid)
+	name = data.name
+	await guild.me.edit(nick=str(name).strip('"'))
+	return
+
+@my_bot.ipc.route()
+async def changeprefix(data):
+	prefix = await bot.prefixes.find(int(data.guildid))
+	if not prefix or "prefix" not in prefix:
+		prefix = {"_id":data.guildid,"prefix":data.newprefix}
+	prefix["prefix"] = str(data.newprefix).strip('"')
+	await my_bot.prefixes.upsert(prefix)
+
 bot.loop.create_task(presence()) # changing the bot's presence every 5 secs
+bot.ipc.start()
 bot.run(token) # running the bot lmao
