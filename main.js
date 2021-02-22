@@ -19,7 +19,7 @@ const Discord = require('discord.js')
 const bot = new Discord.Client();
 const Levels = require('discord-xp')
 const math = require("math")
-Levels.setURL("mongodb+srv://WipDev:deian2006M@swip.ow55l.mongodb.net/Swip?retryWrites=true&w=majority")
+Levels.setURL("here data connection")
 const canvacord = require("canvacord")
 const Database = require("@replit/database")
 const db = new Database()
