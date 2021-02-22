@@ -1,23 +1,178 @@
+# da imports
+
 import discord
 from discord.ext import commands
 import os
 import random
 import json
+import ast
+import asyncio
+import datetime
 
-with open("bot_config/config.json") as f:
-   config = json.load(f)
+#important stuff
+
+with open("bot_config/credentials.json") as f:
+    config = json.load(f)
+
+with open("bot_config/bot-emojis.json") as f:
+    bot_emojis = json.load(f)
 
 # defining a few stuff...
 intents = discord.Intents.all()
 intents.members = True
 intents.bans = True
-intents.typing = True
-bot = commands.Bot(command_prefix="jm ", case_insensitive=True, intents=intents)
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("jm "), case_insensitive=True, intents=intents, allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, users=True))
+bot.remove_command("help")
 token = config['bot-token']
 bot.owner_ids = config['bot-owner-ids']
 
+def insert_returns(body):
+    if isinstance(body[-1], ast.Expr):
+        body[-1] = ast.Return(body[-1].value)
+        ast.fix_missing_locations(body[-1])
+    if isinstance(body[-1], ast.If):
+        insert_returns(body[-1].body)
+        insert_returns(body[-1].orelse)
+
+    if isinstance(body[-1], ast.With):
+        insert_returns(body[-1].body)
+
+async def presence():
+    await bot.wait_until_ready()
+    
+    while not bot.is_closed():
+        streaming_statuses = ["life", "Never gonna loose this BotJam", "life is a lie", f"with {len(bot.guilds)} servers"]
+        streaming_status = random.choice(streaming_statuses)
+        await bot.change_presence(activity = discord.Streaming(name = streaming_status, url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"))
+        await asyncio.sleep(5.0)
+
+# global error handeler
+
+@bot.event
+async def on_command_error(ctx, error):
+  if isinstance(error, commands.CommandNotFound):
+    pass
+  elif isinstance(error, commands.MissingPermissions):
+    await ctx.send("{}, You can't do that, You need the **{}** perms. to do that!".format(ctx.author.mention,' '.join(error.missing_perms[0].split('_'))), delete_after=3.0)
+    await ctx.message.delete()
+  elif isinstance(error, commands.BotMissingPermissions):
+      if error.missing_perms[0] == 'send_messages':
+          return
+      embed=discord.Embed(description="I'm missing the **{}** permission!".format(' '.join(error.missing_perms[0].split('_'))), colour=discord.Colour.blurple())
+      await ctx.message.reply(embed=embed)
+  elif isinstance(error, commands.MemberNotFound):
+    await ctx.send(error, delete_after=3.3)
+  elif isinstance(error, commands.MissingRole):
+    await ctx.send(error)
+  elif isinstance(error, commands.ChannelNotFound):
+    await ctx.send(error)
+  elif isinstance(error, commands.CommandInvokeError):
+      await ctx.send(error)
+  
+# first command
+
+@bot.command(name="eval")
+async def eval_(ctx, *, code):
+  if ctx.author.id in bot.owner_ids: #making sure only the owners have access to eval
+    fn_name = "_eval_expr"
+    code = code.replace("```py", "```")
+    code = code.strip("` ")
+    code = "\n".join(f"    {i}" for i in code.splitlines())
+    body = f"async def {fn_name}():\n{code}"
+    parsed = ast.parse(body)
+    body = parsed.body[0].body
+    insert_returns(body)
+    env = { # defining important eval stuff
+        'bot': bot,
+        'discord': discord,
+        'commands': commands,
+        'ctx': ctx,
+        '__import__': __import__,
+        'asyncio': asyncio,
+        'datetime': datetime,
+        'os': os,
+        'random': random
+    }
+    exec(compile(parsed, filename="<ast>", mode="exec"), env)
+    result = (await eval(f"{fn_name}()", env))
+    try:
+      await ctx.send(result)
+    except:
+      pass
+
+
+@bot.command()
+async def load(ctx, extension):
+  if ctx.author.id in bot.owner_ids:
+      try:
+        bot.load_extension(extension)
+        await ctx.send(f"Loaded `{extension}`")
+      except Exception as e:
+        await ctx.send(e)
+  else:
+    return False
+
+@bot.command()
+async def unload(ctx, extension):
+  if ctx.author.id in bot.owner_ids:
+      try:
+        bot.unload_extension(extension)
+        await ctx.send(f"Unloaded `{extension}`")
+      except Exception as e:
+        await ctx.send(e)
+  else:
+    return False
+
+@bot.command()
+async def reload(ctx, extension):
+  if ctx.author.id in bot.owner_ids:
+      try:
+        bot.unload_extension(extension)
+        bot.load_extension(extension)
+        await ctx.send(f"Reloaded `{extension}`")
+      except Exception as e:
+        await ctx.send(e)
+  else:
+    return False
+
+# eval error handeler
+
+@eval_.error
+async def _eval_error(ctx, error):
+  if isinstance(error, commands.MissingRequiredArgument):
+    if ctx.author.id in bot.owner_ids:
+      await ctx.send("Give me a code to eval")
+    else:
+      pass
+  elif isinstance(error, commands.CommandInvokeError):
+    if ctx.author.id in bot.owner_ids:
+      embed= discord.embed(colour=discord.Colour.dark_red())
+      embed.description = f"**{bot_emojis['error']} Error**\n\n{error}"
+      await ctx.send(embed=embed)
+    else:
+      pass  
+
+# on ready
+
 @bot.event
 async def on_ready():
-  print("Ready to eat jam!")
-  
-bot.run(token)
+  await bot.change_presence(activity=discord.Activity(name=f"{len(bot.guilds)} servers", type=5), status=discord.Status.dnd)
+  print("Bot is ready!")
+  for file in os.listdir("./cogs"):
+    if file.endswith(".py"):
+      try:
+        bot.load_extension(f"cogs.{file[:-3]}")
+      except Exception as e:
+	      print("Cogs error: Cannot load cogs")
+	      print("\033[5;37;40m\033[1;33;40mWARNING\033[1;33;40m\033[0;37;40m", end=' ')
+	      print("Functionality limited!\n")
+	      print(f"exception thrown:\n{e}")
+
+# To make the commands work when the message is edited
+
+@bot.event
+async def on_message_edit(msg_before, message):
+  await bot.process_commands(message)
+
+bot.loop.create_task(presence()) # changing the bot's presence every 5 secs
+bot.run(token) # running the bot lmao
