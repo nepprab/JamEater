@@ -8,6 +8,8 @@ import json
 import ast
 import asyncio
 import datetime
+from mymongo import Document
+import motor.motor_asyncio
 
 #important stuff
 
@@ -37,6 +39,10 @@ intents.members = True
 intents.bans = True
 bot = Bot(command_prefix=commands.when_mentioned_or("jm "), case_insensitive=True, intents=intents, allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, users=True))
 bot.remove_command("help")
+my_bot.connection_url = "mongodb://JamEater:JamEater@cluster0-shard-00-00.zps67.mongodb.net:27017,cluster0-shard-00-01.zps67.mongodb.net:27017,cluster0-shard-00-02.zps67.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-o4zk6d-shard-0&authSource=admin&retryWrites=true&w=majority"
+my_bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(my_bot.connection_url))
+my_bot.db = my_bot.mongo["JamEater"]
+my_bot.prefixes = Document(my_bot.db, "prefixes")
 token = config['bot-token']
 bot.owner_ids = config['bot-owner-ids']
 
