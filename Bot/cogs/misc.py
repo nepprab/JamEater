@@ -37,7 +37,7 @@ class MiscCog(commands.Cog):
             branch = 'master'
 
         final_url = f'<{source_url}/blob/{branch}/{location}#L{firstlineno}-L{firstlineno + len(lines) - 1}>'
-        source_embed = discord.Embed(description=f"Click [here]({final_url}) for the source code of the `{command}` command.")
+        source_embed = discord.Embed(description=f"Click [here]({final_url}) for the source code of the `{command}` command.", , colour=0x7289da)
         await ctx.send(embed=source_embed)      
   
   @commands.command(name="ping")
