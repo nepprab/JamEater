@@ -8,7 +8,7 @@ import json
 import ast
 import asyncio
 import datetime
-from mymongo import Document
+from assets.mymongo import Document
 import motor.motor_asyncio
 
 #important stuff
