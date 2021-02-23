@@ -41,6 +41,7 @@ async def callback():
 async def dashboard(serverid):
 	nickname = await ipc_client.request("getnickname", guildid=int(serverid))
 	prefix = await ipc_client.request("getprefix", guildid=int(serverid))
+	welchannels = await ipc_client.request("getchannels_wel", guildid=int(serverid))
 	return await render_template("dashboard.html", something=nickname, prefix=prefix,limit=limit,channels=json.dumps(channels), welchannels=json.dumps(welchannels), leachannels=json.dumps(leachannels))
 
 @app.route("/servers")
