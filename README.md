@@ -97,8 +97,8 @@ python3 main.py
 |       Commands        |                          Description                                  |
 |:---------------------:|:---------------------------------------------------------------------:|
 | `bug, bugs`           | Report any bugs found in the bot.                                     |
-| `invite`              | Sends the invite link for the bot.                             |
-| `source, sourcecode`  | Sends you a link the redirects you to this github page.               |
-| `supportserver, ss`   | Gets the link to the support server so you can ask doubts there.      |
+| `invite`              | Sends the invite link for the bot.                                    |
+| `source| sourcecode`  | Sends you a link the redirects you to this github page.               |
+| `supportserver| ss`   | Gets the link to the support server so you can ask doubts there.      |
 
 
