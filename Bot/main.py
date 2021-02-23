@@ -13,10 +13,10 @@ import motor.motor_asyncio
 
 #important stuff
 
-with open("bot_config/credentials.json") as f:
+with open("bot-config/credentials.json") as f:
     config = json.load(f)
 
-with open("bot_config/bot-emojis.json") as f:
+with open("bot-config/bot-emojis.json") as f:
     bot_emojis = json.load(f)
 
 class Bot(commands.Bot):
