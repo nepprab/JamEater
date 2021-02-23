@@ -28,8 +28,8 @@ sudo python3 -m pip install -r requirements.txt
 
 You would also need to edit a few files to run: 
 
-- `bot_config/credentials.json` - Contains the bot's token, and owner ids.
-- `bot_config/bot-emojis.json` - Contains all the emojis the bot uses.
+- `bot-config/credentials.json` - Contains the bot's token, and owner ids.
+- `bot-config/bot-emojis.json` - Contains all the emojis the bot uses.
 
 ## Running the bot
 
@@ -64,7 +64,7 @@ python3 main.py
 |:---------------------------:|:--------------------------------------------------------------------------------------------------:|
 | `kick`                      | Kicks the mentioned user from the guild.                                                           |
 | `multikick`                 | Kicks Multiple people out of the guild.                                                            |
-| `ban, hardban`              | Bans the infracted user from the guild, **with purging the member's messages**.                    |
+| `ban | hardban`             | Bans the infracted user from the guild, **with purging the member's messages**.                    |
 | `softban`                   | Bans the infracted user from the guild, **without purging the member's messages**.                 |
 | `multiban`                  | Bans multiple users out of the guild.                                                              |
 | `unban`                     | Unbans the user from the guild.                                                                    |
@@ -97,7 +97,7 @@ python3 main.py
 |       Commands        |                          Description                                  |
 |:---------------------:|:---------------------------------------------------------------------:|
 | `bug, bugs`           | Report any bugs found in the bot.                                     |
-| `invite`              | Sends an embeded invite link for the bot.                             |
+| `invite`              | Sends the invite link for the bot.                             |
 | `source, sourcecode`  | Sends you a link the redirects you to this github page.               |
 | `supportserver, ss`   | Gets the link to the support server so you can ask doubts there.      |
 
