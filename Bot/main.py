@@ -226,7 +226,7 @@ async def changenick(data):
 	await guild.me.edit(nick=str(name).strip('"'))
 	return
 
-@my_bot.ipc.route()
+@bot.ipc.route()
 async def changeprefix(data):
 	prefix = await bot.prefixes.find(int(data.guildid))
 	if not prefix or "prefix" not in prefix:
@@ -234,6 +234,24 @@ async def changeprefix(data):
 	prefix["prefix"] = str(data.newprefix).strip('"')
 	await my_bot.prefixes.upsert(prefix)
 
+@bot.ipc.route()
+async def getchannels_star(data):
+	guild = my_bot.get_guild(int(data.guildid))
+	data1 = await my_bot.welcomes.find(int(data.guildid))
+	channels = []
+	if data1 is None:
+		channels.append({"id": "", "name": "No Channel Set"})
+	else:
+		channel = guild.get_channel(int(data1["channel"]))
+		channels.append({"id": str(data1["channel"]), "name": channel.name})
+	for channel in guild.text_channels:
+		if {"id": str(channel.id), "name": f"{channel.name}"} in channels:
+			continue
+		channels.append({"id": str(channel.id), "name": f"{channel.name}"})
+	if not data1:
+		return channels
+	return channels
+	
 bot.loop.create_task(presence()) # changing the bot's presence every 5 secs
 bot.ipc.start()
 bot.run(token) # running the bot lmao
