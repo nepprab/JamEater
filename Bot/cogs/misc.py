@@ -15,7 +15,7 @@ class MiscCog(commands.Cog):
       await ctx.send(embed=embed)
     else:
         source_url = 'https://github.com/ProGamer368/JamEater'
-        branch = 'master/Bot'      
+        branch = 'master'      
         if command == 'help':
             src = type(self.bot.help_command)
             module = src.__module__
