@@ -40,8 +40,8 @@ intents.bans = True
 bot = Bot(command_prefix=commands.when_mentioned_or("jm "), case_insensitive=True, intents=intents, allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, users=True))
 bot.remove_command("help")
 bot.connection_url = "mongodb://JamEater:JamEater@cluster0-shard-00-00.zps67.mongodb.net:27017,cluster0-shard-00-01.zps67.mongodb.net:27017,cluster0-shard-00-02.zps67.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-o4zk6d-shard-0&authSource=admin&retryWrites=true&w=majority"
-bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(my_bot.connection_url))
-bot.db = my_bot.mongo["JamEater"]
+bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
+bot.db = bot.mongo["JamEater"]
 bot.prefixes = Document(bot.db, "prefixes")
 bot.welcomes = Document(bot.db, "welcomes")
 token = config['bot-token']
@@ -220,9 +220,9 @@ async def getprefix(data):
 		return bot.command_prefix
 	return str(prefixes["prefix"])
 
-@my_bot.ipc.route()
+@bot.ipc.route()
 async def changenick(data):
-	guild = my_bot.get_guild(data.guildid)
+	guild = bot.get_guild(data.guildid)
 	name = data.name
 	await guild.me.edit(nick=str(name).strip('"'))
 	return
@@ -233,12 +233,12 @@ async def changeprefix(data):
 	if not prefix or "prefix" not in prefix:
 		prefix = {"_id":data.guildid,"prefix":data.newprefix}
 	prefix["prefix"] = str(data.newprefix).strip('"')
-	await my_bot.prefixes.upsert(prefix)
+	await bot.prefixes.upsert(prefix)
 
 @bot.ipc.route()
 async def getchannels_wel(data):
-	guild = my_bot.get_guild(int(data.guildid))
-	data1 = await my_bot.welcomes.find(int(data.guildid))
+	guild = bot.get_guild(int(data.guildid))
+	data1 = await bot.welcomes.find(int(data.guildid))
 	channels = []
 	if data1 is None:
 		channels.append({"id": "", "name": "No Channel Set"})
