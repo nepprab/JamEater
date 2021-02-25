@@ -39,7 +39,7 @@ intents.members = True
 intents.bans = True
 bot = Bot(command_prefix=commands.when_mentioned_or("jm "), case_insensitive=True, intents=intents, allowed_mentions = discord.AllowedMentions(everyone=False, roles=False, users=True))
 bot.remove_command("help")
-bot.connection_url = "mongodb://JamEater:JamEater@cluster0-shard-00-00.zps67.mongodb.net:27017,cluster0-shard-00-01.zps67.mongodb.net:27017,cluster0-shard-00-02.zps67.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-o4zk6d-shard-0&authSource=admin&retryWrites=true&w=majority"
+bot.connection_url = config['mongo-url']
 bot.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(bot.connection_url))
 bot.db = bot.mongo["JamEater"]
 bot.prefixes = Document(bot.db, "prefixes")
