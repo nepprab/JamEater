@@ -159,6 +159,39 @@ class UtilityCog(commands.Cog):
     else:
       await ctx.send(f"**An Unknown Error Occurred**\n\nAn unknown error occured in the `{ctx.command.name}` command, please consider joining our support server and reporting this bug. (<https://discord.gg/CSZdMdAuZt>)")
 
+  @commands.group(aliases=["welc"],invoke_without_command=True)
+  async def welcome(self,ctx):
+      await ctx.invoke(self.bot.get_command("help"), entity="welcome")
+
+  @welcome.command(name="channel")
+  async def welchannel(self,ctx,channel:discord.TextChannel):
+      data = await self.bot.welcomes.find(ctx.guild.id)
+      if data is None:
+          data = {"_id": ctx.guild.id, "channel": channel.id, "message": "{member} Welcome to **{server}**! Have a great time here!"}
+      data["channel"] = channel.id
+      await self.bot.welcomes.upsert(data)
+      await ctx.send("The welcome channel has been set as {}".format(channel.mention))
+
+  @welcome.command(name="message", usage = "[message (or args for args)]")
+  async def welmessage(self,ctx,*,message:commands.clean_content):
+      data = await self.bot.welcomes.find(ctx.guild.id)
+      if message == "args":
+          return await ctx.send("The args for the welcome message are:\n```{member}: Mentions the member\n{server}: sends the server name```")
+      if data is None:
+          return await ctx.send("Set up a channel first then set a welcome message")
+      data["message"] = message
+      await self.bot.welcomes.upsert(data)
+      await ctx.send("The welcome message has been set as\n\n{}".format(message))
+
+  @welcome.command(name="role")
+  async def welrole(self,ctx,role:discord.Role):
+      data = await self.bot.welcomes.find(ctx.guild.id)
+      if data is None and "role" not in data:
+          return await ctx.send("Set up a channel first then set a welcome message")
+      data["role"] = role.id
+      await self.bot.welcomes.upsert(data)
+      await ctx.send("The welcome role has been set as `{}`".format(role.name))
+      
 def setup(bot):
   bot.add_cog(UtilityCog(bot))
   print("UtilityCog is ready!")
