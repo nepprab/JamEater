@@ -1,0 +1,232 @@
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>JamEater Dashboard</title>
+    <link href="/static/css/style.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/perfect-scrollbar.jquery.min.js"></script>
+    <script>
+      function confirmSave(id, data){
+          console.log(window.location.href.replace("http://172.0.0.1:5000/dashboard/", ""));
+          let input = document.getElementById(data).value;
+          console.log(input);
+          console.log(JSON.stringify(input));
+          event.preventDefault(); // Stop form submission
+          if (input === ""){
+              document.getElementById(data).style.border = "2px solid red";
+              setTimeout(function () {
+                  document.getElementById(data).style.border = null;
+              }, 3000);
+          } else {
+            let format = window.location.href.replace("http://127.0.0.1:5000/dashboard/", "");
+            document.getElementById(data).style.border = "2px solid green";
+            document.getElementById(id).innerText = "Saved!";
+            let button = document.getElementById(id).id
+            $.post(`/change/${button}/${format}`, {
+                data: JSON.stringify(input),
+                contentType: "application/json"
+              });
+            setTimeout(function () {
+              document.getElementById(data).style.border = null;
+              document.getElementById(id).innerText = "Save";
+            }, 3000);
+          }
+      };
+    </script>
+</head>
+<body class="">
+      <div class="modal modal-search fade" id="searchModal" tabindex="-1" role="dialog" aria-labelledby="searchModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <input type="text" class="form-control" id="inlineFormInputGroup" placeholder="SEARCH">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <i class="tim-icons icon-simple-remove"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Navbar -->
+      <div class="content">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card card-chart">
+                    <div class="card-header">
+                    <h5 class="card-category">Nickname</h5>
+                    <h4 class="card-title">Set JamEater's Nickname In Your Server</h4>
+                    </div>
+                    <div class="card-body">
+                    <div class="chart-area">
+                        <center>
+                        <div class="form-group">
+                            <label>Nickname</label>
+                            <input type="text" class="form-control" placeholder="Nickname" id = "nickNameData" name='Nick' value="{{ something }}">
+                            <button class="btn btn-warning animation-on-hover" onclick="confirmSave('nicknameSave', 'nickNameData');" id = "nicknameSave">Save</button>
+                            <br>
+                        </div>
+                        </center>
+                    </div>
+                    </div>
+                </div>
+            </div>
+          <div class="col-lg-4">
+            <div class="card card-chart">
+              <div class="card-header">
+                <h5 class="card-category">Prefix</h5>
+                <h4 class="card-title">Set JamEater's Prefix In Your Server</h4>
+              </div>
+              <div class="card-body">
+                <div class="chart-area">
+                  <center>
+                    <div class="form-group">
+                      <label>Prefix</label>
+                      <input type="text" class="form-control" placeholder="Prefix" id = "prefixData" name='Prefix' value="{{ prefix }}">
+                      <button class="btn btn-warning animation-on-hover" onclick="confirmSave('prefixSave', 'prefixData');" id = "prefixSave">Save</button>
+                      <br>
+                    </div>
+                  </center>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card card-chart">
+              <div class="card-header">
+                <h5 class="card-category">Starboard</h5>
+                <h4 class="card-title">Configure the starboard system.</h4>
+              </div>
+              <div class="card-body">
+                <div class="chart-area">
+                  <center>
+                    <div class="form-group">
+                      <label>Starboard Channel:</label>
+                      <select class="form-control" name="channel" id="starchannel"></select>
+
+                    </div>
+                      <button type="submit" class="btn btn-warning animation-on-hover" onclick = "confirmSave('starboardChannelSave', 'starchannel');" id="starboardChannelSave">Save</button><br>
+                      <label>Star limit</label>
+                      <input type="text" class="form-control" placeholder="limit" id = "starLimitData" name="StarLim" value="{{ limit }}">
+                      <button type="submit" class="btn btn-warning animation-on-hover" onclick = "confirmSave('starboardLimitSave', 'starLimitData');" id="starboardLimitSave">Save</button>
+                      <br>
+                      <br>
+                      <br>
+                  </center>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card card-tasks">
+              <div class="card-header">
+                <h5 class="card-category">Welcome</h5>
+                <h4 class="card-title">Configure the welcome system.</h4>
+              </div>
+              <div class="card-body">
+                <div class="chart-area">
+                  <center>
+                    <div class="form-group">
+                      <label>Welcome Channel:</label>
+                      <select class="form-control" name="channel" id="welchannel"></select>
+
+                    </div>
+                      <button type="submit" class="btn btn-warning animation-on-hover" onclick = "confirmSave('welchannelsave', 'welchannel');" id ="welchannelsave">Save</button>
+                      <br>
+                    <div class="form-group">
+                      <label>Welcome Role:</label>
+                      <select class="form-control" name="channel" id="welrole"></select>
+
+                    </div>
+                      
+                      <button type="submit" class="btn btn-warning animation-on-hover" onclick = "confirmSave('welrolesave', 'welchannel');" id ="welrolesave">Save</button>                      
+                      <br>
+                      <label>Welcome Message:</label>
+                      <input type="text" class="form-control" placeholder="Message" id = "welmessage" name='Prefix' value="{{ welmsg }}">
+                      <button class="btn btn-warning animation-on-hover" onclick="confirmSave('welmessagesave', 'welmessage');" id = "welmessagesave">Save</button>
+                      <br>
+                  </center>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card card-chart">
+              <div class="card-header">
+                <h5 class="card-category">Leaves</h5>
+                <h4 class="card-title">Configure the leave channel.</h4>
+              </div>
+              <div class="card-body">
+                <div class="chart-area">
+                  <center>
+                    <div class="form-group">
+                      <label>Leave Channel:</label>
+                      <select class="form-control" name="channel" id="leachannel"></select>
+
+                    </div>
+                      <button type="submit" class="btn btn-warning animation-on-hover" onclick = "confirmSave('leachannelsave', 'leachannel');" id ="leachannelsave">Save</button>
+                      <br>
+                      <br>
+                      <br>
+                  </center>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="container-fluid">
+          <div class="copyright">
+            ©
+            <script>
+              document.write(new Date().getFullYear())
+            </script>,
+               JamEater
+          </div>
+        </div>
+      </footer>
+</div>
+<script>
+    var starchannels = JSON.parse('{{ channels|safe }}')
+    for (server = 0; server < starchannels.length; server++){
+      const option = document.createElement("option");
+      const text = document.createTextNode("# " + starchannels[server]['name']);
+      option.appendChild(text);
+      option.value = starchannels[server]['id'];
+      option.setAttribute("style", "color:black");
+      option.setAttribute("class", "form-control");
+      document.getElementById("starchannel").appendChild(option);
+    }
+
+    var welchannels = JSON.parse('{{ welchannels|safe }}')
+    for (server = 0; server < welchannels.length; server++){
+      const option = document.createElement("option");
+      const text = document.createTextNode("# " + welchannels[server]['name']);
+      option.appendChild(text);
+      option.value = welchannels[server]['id'];
+      option.setAttribute("style", "color:black");
+      option.setAttribute("class", "form-control");
+      document.getElementById("welchannel").appendChild(option);
+    }
+    var welroles = JSON.parse('{{ welroles|safe }}')
+    for (server = 0; server < welroles.length; server++){
+      const option = document.createElement("option");
+      const text = document.createTextNode("@" + welroles[server]['name']);
+      option.appendChild(text);
+      option.value = welroles[server]['id'];
+      option.setAttribute("style", "color:black");
+      option.setAttribute("class", "form-control");
+      document.getElementById("welrole").appendChild(option);
+    }
+    var leachannels = JSON.parse('{{ leachannels|safe }}')
+    for (server = 0; server < leachannels.length; server++){
+      const option = document.createElement("option");
+      const text = document.createTextNode("# " + leachannels[server]['name']);
+      option.appendChild(text);
+      option.value = leachannels[server]['id'];
+      option.setAttribute("style", "color:black");
+      option.setAttribute("class", "form-control");
+      document.getElementById("leachannel").appendChild(option);
+    }
+</script>
+</body>
