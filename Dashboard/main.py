@@ -2,11 +2,12 @@ from quart import Quart, render_template, request, session, redirect, url_for,js
 from quart_discord import DiscordOAuth2Session
 from discord.ext import ipc
 import html
+from mymongo import Document
+
 import json
 
-
 app = Quart(__name__)
-ipc_client = ipc.Client(secret_key = "JamEater")
+ipc_client = ipc.Client(secret_key = "Swas")
 
 app.config["SECRET_KEY"] = "test123"
 app.config["DISCORD_CLIENT_ID"] = 813008914207080449
@@ -14,10 +15,11 @@ app.config["DISCORD_CLIENT_SECRET"] = "zn-ifplp8Z8XVatyFN5DGmRsiOMmdnsJ"
 app.config["DISCORD_REDIRECT_URI"] = "https://127.0.0.1:5000/callback"
 
 discord = DiscordOAuth2Session(app)
+list = [{"id": "", "name":"No Channel Set"}]
 
 @app.route("/")
 async def home():
-	return await render_template("index.html")
+	return await render_template("index.html",something="a",prefix="jb ",channels=json.dumps(list),welchannels=json.dumps(list),welroles=json.dumps(list),welmsg="A")
 
 @app.route("/login")
 async def login():
@@ -25,7 +27,7 @@ async def login():
 
 @app.route("/invite/<guildid>")
 async def invite(guildid):
-	return await discord.create_session(scope=["bot"], permissions=8, guild_id=guildid, disable_guild_select=True)
+	return await discord.create_session(scope=["bot"], permissions=2146958839, guild_id=guildid, disable_guild_select=True)
 
 @app.route("/callback")
 async def callback():
@@ -35,14 +37,18 @@ async def callback():
 		return redirect(url_for("login"))
 
 	user = await discord.fetch_user()
-	return redirect(url_for("servers"))
+	return redirect(url_for("servers")) #You should return redirect(url_for("dashboard")) here
 
 @app.route("/dashboard/<serverid>")
 async def dashboard(serverid):
-	nickname = await ipc_client.request("getnickname", guildid=int(serverid))
-	prefix = await ipc_client.request("getprefix", guildid=int(serverid))
-	welchannels = await ipc_client.request("getchannels_wel", guildid=int(serverid))
-	return await render_template("dashboard.html", something=nickname, prefix=prefix,limit=limit,channels=json.dumps(channels), welchannels=json.dumps(welchannels), leachannels=json.dumps(leachannels))
+    nickname = await ipc_client.request("getnickname", guildid=int(serverid))
+    prefix = await ipc_client.request("getprefix", guildid=int(serverid))
+    channels, limit = await ipc_client.request("getchannels", guildid=int(serverid))
+    welchannels = await ipc_client.request("getchannels_wel", guildid=int(serverid))
+    welroles = await ipc_client.request("getroles_wel", guildid=int(serverid))
+    welmsg = await ipc_client.request("getmessage_wel", guildid=int(serverid))
+    leachannels = await ipc_client.request("getchannels_leave", guildid=int(serverid))
+    return await render_template("dashboard.html", something=nickname, prefix=prefix,limit=limit,channels=json.dumps(channels), welchannels=json.dumps(welchannels), welroles=json.dumps(welroles), welmsg=welmsg, leachannel=json.dumps(leachannels))
 
 @app.route("/servers")
 async def servers():
@@ -75,6 +81,29 @@ async def nick(method,serverid):
 	if method == "prefixSave":
 		data = await request.form
 		await ipc_client.request("changeprefix", guildid=int(serverid), newprefix=data["data"])
+		return redirect(f"/dashboard/{serverid}")
+	if method == "starboardChannelSave":
+		data = await request.form
+		await ipc_client.request("changestar", guildid=int(serverid), channel_id=data["data"].replace('"',''))
+		return redirect(f"/dashboard/{serverid}")
+	if method == "starboardLimitSave":
+		data = await request.form
+		await ipc_client.request("changestar", guildid=int(serverid), limit=data["data"].replace('"',''))
+		return redirect(f"/dashboard/{serverid}")
+	if method == "welchannelsave":
+		data = await request.form
+		await ipc_client.request("changewel", guildid=int(serverid), channel_id=data["data"].replace('"',''))
+		return redirect(f"/dashboard/{serverid}")
+	if method == "welrolesave":
+		data = await request.form
+		await ipc_client.request("changewelrole", guildid=int(serverid), channel_id=data["data"].replace('"',''))
+		return redirect(f"/dashboard/{serverid}")
+	if method == "welmessagesave":
+		data = await request.form
+		await ipc_client.request("changewel_msg", guildid=int(serverid), message=data["data"].replace('"',''))
+	if method == "leachannelsave":
+		data = await request.form
+		await ipc_client.request("changelea", guildid=int(serverid), channel_id=data["data"].replace('"',''))
 		return redirect(f"/dashboard/{serverid}")
 
 if __name__ == "__main__":
